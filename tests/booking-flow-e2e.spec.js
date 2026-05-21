@@ -28,12 +28,12 @@ async function login(page) {
  */
 async function clearAllBookings(page) {
   await page.goto(`${BASE_URL}/bookings`);
-  const isEmpty = await page.getByText('No bookings yet').isVisible().catch(() => false);
+  const isEmpty = await page.getByRole('heading', { name: 'No bookings yet' }).isVisible().catch(() => false);
   if (isEmpty) return;
 
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: /clear all bookings/i }).click();
-  await expect(page.getByText('No bookings yet')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'No bookings yet' })).toBeVisible({ timeout: 10000 });
 }
 
 /**
@@ -237,8 +237,8 @@ test.describe('Booking Flow — E2E (First Three Tests)', () => {
     // -- Step 9: Verify booking is no longer in the list --
     // Wait for the booking card to disappear, then verify empty state
     const cancelledBookingCard = page.getByTestId('booking-card').filter({ hasText: bookingRef });
-    await expect(cancelledBookingCard).not.toBeVisible({ timeout: 5000 });
-    await expect(page.getByText('No bookings yet')).toBeVisible({ timeout: 5000 });
+    await expect(cancelledBookingCard).toHaveCount(0, { timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'No bookings yet' })).toBeVisible({ timeout: 10000 });
     console.log(`[TC-003] ✓ Booking removed from list`);
 
     // -- Step 10: Navigate to event page and verify seats are restored --

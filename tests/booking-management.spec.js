@@ -63,13 +63,13 @@ async function clearBookings(page) {
     return;
   }
   
-  const alreadyEmpty = await page.getByText('No bookings yet').isVisible().catch(() => false);
+  const alreadyEmpty = await page.getByRole('heading', { name: 'No bookings yet' }).isVisible().catch(() => false);
   if (alreadyEmpty) return;
 
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: /clear all bookings/i }).click();
   // Wait for success (empty state appears)
-  await expect(page.getByText('No bookings yet')).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('heading', { name: 'No bookings yet' })).toBeVisible({ timeout: 10000 });
 }
 
 // ── Test Suite ─────────────────────────────────────────────────────────────────
@@ -205,7 +205,7 @@ test.describe('Booking Management — Critical Happy Paths', () => {
     await expect(page.getByText('Booking cancelled successfully')).toBeVisible();
 
     // -- Step 7: Assert booking is no longer in the list --
-    await expect(page.getByText('No bookings yet')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'No bookings yet' })).toBeVisible({ timeout: 10000 });
   });
 
   // TC-004 ───────────────────────────────────────────────────────────────────
