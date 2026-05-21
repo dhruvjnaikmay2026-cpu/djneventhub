@@ -140,9 +140,9 @@ test.describe('Booking Flow — E2E (First Three Tests)', () => {
     // -- Step 10: Verify total is displayed --
     await expect(page.getByText('Total').last()).toBeVisible();
 
-    // -- Step 11: Verify navigation links are available --
-    await expect(page.getByRole('link', { name: 'View My Bookings' })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Browse Events/i })).toBeVisible();
+    // -- Step 11: Verify navigation buttons are available --
+    await expect(page.getByRole('button', { name: 'View My Bookings' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Browse More Events' })).toBeVisible();
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -235,7 +235,10 @@ test.describe('Booking Flow — E2E (First Three Tests)', () => {
     console.log(`[TC-003] ✓ Success toast displayed`);
 
     // -- Step 9: Verify booking is no longer in the list --
-    await expect(page.getByText('No bookings yet')).toBeVisible();
+    // Wait for the booking card to disappear, then verify empty state
+    const cancelledBookingCard = page.getByTestId('booking-card').filter({ hasText: bookingRef });
+    await expect(cancelledBookingCard).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('No bookings yet')).toBeVisible({ timeout: 5000 });
     console.log(`[TC-003] ✓ Booking removed from list`);
 
     // -- Step 10: Navigate to event page and verify seats are restored --

@@ -55,12 +55,21 @@ async function bookEvent(page) {
  */
 async function clearBookings(page) {
   await page.goto(`${BASE_URL}/bookings`);
+  // Wait for page to load (either bookings appear or empty state)
+  try {
+    await expect(page.getByTestId('booking-card').first()).toBeVisible({ timeout: 5000 });
+  } catch {
+    // Page already shows empty state
+    return;
+  }
+  
   const alreadyEmpty = await page.getByText('No bookings yet').isVisible().catch(() => false);
   if (alreadyEmpty) return;
 
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: /clear all bookings/i }).click();
-  await expect(page.getByText('No bookings yet')).toBeVisible();
+  // Wait for success (empty state appears)
+  await expect(page.getByText('No bookings yet')).toBeVisible({ timeout: 10000 });
 }
 
 // ── Test Suite ─────────────────────────────────────────────────────────────────
@@ -95,6 +104,7 @@ test.describe('Booking Management — Critical Happy Paths', () => {
     // -- Step 2: Navigate to /bookings and click View Details --
     await page.goto(`${BASE_URL}/bookings`);
     const card = page.getByTestId('booking-card').filter({ hasText: bookingRef });
+    await expect(card).toBeVisible({ timeout: 5000 });
     await card.getByRole('link', { name: 'View Details' }).click();
     await expect(page).toHaveURL(/\/bookings\/\d+/);
 
@@ -143,8 +153,8 @@ test.describe('Booking Management — Critical Happy Paths', () => {
     const bookingRef = (await refEl.textContent())?.trim() ?? '';
     console.log(`Booking confirmed. Ref: ${bookingRef}`);
 
-    // -- Step 4: Click "View My Bookings" link on confirmation card --
-    await page.getByRole('link', { name: 'View My Bookings' }).click();
+    // -- Step 4: Click "View My Bookings" button on confirmation card --
+    await page.getByRole('button', { name: 'View My Bookings' }).click();
     await expect(page).toHaveURL(`${BASE_URL}/bookings`);
 
     // -- Step 5: Assert the new booking appears in the list --
