@@ -74,6 +74,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: pre-deploy-checks   # Hard dependency — never deploy if checks fail
+    if: secrets.SERVER_HOST != '' && secrets.SERVER_USER != '' && secrets.SERVER_SSH_KEY != ''
 
     # Enabling an `environment` unlocks:
     #   - Required reviewers (manual approval gate before deploy)
