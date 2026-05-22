@@ -14,7 +14,17 @@ const authRoutes       = require('./src/routes/authRoutes');
 const app = express();
 
 // ─── Core Middleware ──────────────────────────────────────────────────────────
-app.use(cors({ origin: CORS_ORIGIN, credentials: true }));
+const allowedOrigins = CORS_ORIGIN.split(',').map((origin) => origin.trim());
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);

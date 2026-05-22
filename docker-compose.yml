@@ -1,0 +1,59 @@
+services:
+  db:
+    image: mysql:8.1
+    environment:
+      MYSQL_ROOT_PASSWORD: eventhub
+      MYSQL_DATABASE: eventhub
+      MYSQL_USER: eventhub
+      MYSQL_PASSWORD: eventhub
+    ports:
+      - '3306:3306'
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: 'mysql://eventhub:eventhub@db:3306/eventhub'
+      PORT: 3001
+      NODE_ENV: development
+      CORS_ORIGIN: 'http://frontend:3000,http://localhost:3000'
+      JWT_SECRET: eventhub_jwt_secret_2025
+    depends_on:
+      - db
+    ports:
+      - '3001:3001'
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      NEXT_PUBLIC_API_URL: 'http://backend:3001/api'
+    depends_on:
+      - backend
+    ports:
+      - '3000:3000'
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      BASE_URL: 'http://frontend:3000'
+    depends_on:
+      - frontend
+      - backend
+    command: ["sh", "./docker/test-wait.sh"]
+    tty: false
+    stdin_open: false
+
+volumes:
+  db_data:

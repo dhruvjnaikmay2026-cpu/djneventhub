@@ -12,9 +12,34 @@ A full-stack ticket booking platform built with **Next.js 14**, **Express.js**, 
 
 ## Prerequisites
 
-- **Node.js 18+**
-- **MySQL 8+** running locally (or a remote instance)
-- **npm** (comes with Node.js)
+- **Docker** 24+ and **Docker Compose**
+
+> If you prefer a local install, you can still use Node.js and MySQL as before.
+
+---
+
+## Docker Quick Start
+
+### 1. Clone the repository
+
+```bash
+git clone <repo-url>
+cd eventhub
+```
+
+### 2. Build and run the containerized app + tests
+
+```bash
+docker compose up --build --abort-on-container-exit --exit-code-from tests
+```
+
+This command starts MySQL, backend, frontend, then runs Playwright tests once the frontend is ready.
+
+### 3. Stop the containers
+
+```bash
+docker compose down
+```
 
 ---
 
